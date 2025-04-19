@@ -20,9 +20,9 @@ public class ConfigManager {
 
     private static final YamlConfigurationProperties PROPERTIES = ConfigLib.BUKKIT_DEFAULT_PROPERTIES.toBuilder()
             .charset(StandardCharsets.UTF_8)
-            .outputNulls(true)
-            .inputNulls(false)
-            .footer("Authors: AlexDev_")
+            .outputNulls(false)
+            .inputNulls(true)
+            .footer("Authors: AlexDev_, jamailun")
             .build();
 
     private final UnlimitedNameTags plugin;
@@ -82,7 +82,7 @@ public class ConfigManager {
             final Settings.NameTag nameTag = entry.getValue();
             if (nameTag.scale() <= 0) {
                 plugin.getLogger().warning("Nametag scale is less than or equal to 0");
-                nameTags.put(entry.getKey(), new Settings.NameTag(nameTag.permission(), nameTag.linesGroups(), nameTag.background(), 1f));
+                nameTags.put(entry.getKey(), new Settings.NameTag(nameTag.permission(), nameTag.username(), nameTag.linesGroups(), nameTag.background(), 1f));
                 save = true;
             } else {
                 nameTags.put(entry.getKey(), nameTag);

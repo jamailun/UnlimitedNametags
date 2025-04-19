@@ -22,10 +22,12 @@ import java.util.*;
 @Getter
 public class Settings {
 
+    private static final Background DEFAULT_BG = new HexBackground(false, "#ffffff", 255, false, false);
+
     private Map<String, NameTag> nameTags = new LinkedHashMap<>() {{
-        put("staffer", new NameTag("nametag.staffer", List.of(new LinesGroup(List.of("%luckperms_prefix% %player_name% %luckperms_suffix%"), List.of(new GlobalModifier(true)))),
+        put("staffer", new NameTag("nametag.staffer", "", List.of(new LinesGroup(List.of("%luckperms_prefix% %player_name% %luckperms_suffix%"), List.of(new GlobalModifier(true)))),
                 new IntegerBackground(false, 255, 0, 0, 255, true, false), 1f));
-        put("default", new NameTag("nametag.default", List.of(new LinesGroup(List.of("%luckperms_prefix% %player_name% %luckperms_suffix%"), List.of(new GlobalModifier(true))),
+        put("default", new NameTag("nametag.default", "", List.of(new LinesGroup(List.of("%luckperms_prefix% %player_name% %luckperms_suffix%"), List.of(new GlobalModifier(true))),
                 new LinesGroup(List.of("Rich Player"), List.of(new ConditionalModifier("%vault_eco_balance%", ">", "1000")))),
                 new HexBackground(false, "#ffffff", 255, false, false), 1f));
     }};
@@ -36,7 +38,7 @@ public class Settings {
 
     public NameTag getNametag(Player player) {
         return nameTags.entrySet().stream()
-                .filter(entry -> player.hasPermission(entry.getValue().permission))
+                .filter(entry -> entry.getValue().accepts(player))
                 .findFirst()
                 .map(Map.Entry::getValue)
                 .orElse(nameTags.get("default"));
@@ -94,7 +96,16 @@ public class Settings {
     public record PlaceholderReplacement(String placeholder, String replacement) {
     }
 
-    public record NameTag(String permission, List<LinesGroup> linesGroups, Background background, float scale) {
+    public record NameTag(String permission, String username, List<LinesGroup> linesGroups, Background background, float scale) {
+        public boolean accepts(Player player) {
+            boolean hasPerm = permission == null || permission.isBlank() || player.hasPermission(permission);
+            boolean hasName = username == null || username.isBlank() || username.equals(player.getName());
+            return hasName && hasPerm;
+        }
+        @Override
+        public Background background() {
+            return Objects.requireNonNullElse(background, DEFAULT_BG);
+        }
     }
 
     public record LinesGroup(List<String> lines, List<Modifier> modifiers) {
